@@ -2,7 +2,11 @@ FROM kalilinux/kali-linux-docker
 
 
 ## Install an SSH of your choice.
-ADD key.pub /tmp/your_key.pub
-RUN mkdir /root/.ssh && cat /tmp/your_key.pub >> /root/.ssh/authorized_keys && rm -f /tmp/your_key.pub && apt install -y openssh-server && apt clean
+RUN echo 'root:root' |chpasswd
 
-RUN service ssh start
+RUN apt install -y openssh-server && apt clean
+
+RUN sed -ri 's/^PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
+
+CMD    ["/usr/sbin/sshd", "-D"]
